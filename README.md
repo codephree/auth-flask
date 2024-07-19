@@ -28,4 +28,4 @@ An app template for large Flask applications with Flask-SQLAlchemy integration. 
 ├── config.py
 ```
 
-# Credit @DigitalOcean
+Credit @DigitalOcean
