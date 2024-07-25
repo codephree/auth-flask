@@ -3,8 +3,8 @@
 {% block content %}
 <div>
     <h1>Home </h1>
-    {% if message %}
-      <div>{{ message }} </div>
-    {% endif %}
+    <form action="{{ url_for('logout')}}" method="post">
+      <button class="submit">Logout</button>
+    </form>
 </div>
 {% endblock %}

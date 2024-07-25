@@ -7,6 +7,7 @@ from wtforms.validators import InputRequired,DataRequired, Length, EqualTo
 import os
 from datetime import datetime
 from sqlalchemy import exc
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,7 +21,16 @@ bcrypt = Bcrypt(app)
 
 db = SQLAlchemy(app)
 
-class User(db.Model):
+login_manager = LoginManager()
+login_manager.login_view = 'login'
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+     # since the user_id is just the primary key of our user table, use it in the query for the user
+     return User.query.get(int(user_id))
+
+class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True)
     firstname = db.Column(db.String(100), nullable=False)
     lastname = db.Column(db.String(100), nullable=False)
@@ -49,6 +59,7 @@ class loginForm(FlaskForm):
 
 
 @app.route('/')
+@login_required
 def home():
     # autenticate page
     return render_template('home.html')
@@ -56,6 +67,21 @@ def home():
 @app.route('/login', methods=['GET', 'POST'])
 def login(): 
     form = loginForm()  
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+
+        if user is None:
+           flash("Email address not found in our system", "danger")
+           return render_template('login.html', form=form) 
+       
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user)
+            flash("You are now logged in successfully.", "success")
+            return redirect('/')
+        else:
+            flash("Invalid credential please try again", "danger")
+            return render_template('login.html', form=form)  
+   
     return render_template('login.html', form=form)
 
 @app.route('/register', methods=['GET','POST'])
@@ -71,14 +97,16 @@ def register():
              db.session.commit()   
              flash("Account created Successfully,You can now login with your username and password!", "success") 
              return redirect('login') 
-          except exc.IntegrityError:
-              flash("Email already registered!", "error") 
-       
+          except exc.IntegrityError as e:
+              flash("Email not registerddbdb", "error") 
+          except exc.OperationalError as e:
+               flash('An Error occured', "error")   
     return render_template('register.html', form=form)
 
 @app.route('/logout', methods=['POST'])
+@login_required
 def logout():
-    # print('I am very')
+    logout_user()
     return redirect('login')
 
 @app.errorhandler(405)
