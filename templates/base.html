@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} {% endblock %} | Demo</title>
+
+    <!-- General CSS Files -->
+    <link rel="stylesheet"  href = "{{ url_for('static', filename='css/app.min.css')}}" >
+    <link rel="stylesheet" href="{{ url_for('static', filename='bundles/izitoast/css/iziToast.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bundles/bootstrap-social/bootstrap-social.css') }}">
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <!-- Custom style CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+
+</head>
+<body>
+    <!-- <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+    </nav> -->
+    <div class="loader"></div>
+    <div id="app">
+      <section class="section">
+        {% block content %} {% endblock %}
+     </section>
+    </div>   
+    <!-- General JS Scripts -->
+    <script src="{{ url_for('static', filename='js/app.min.js') }}"></script>
+    <!-- JS Libraies -->
+    <!-- Page Specific JS File -->
+    {% block scripts %} {% endblock %} 
+    <!-- Template JS File -->
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <!-- Custom JS File -->
+    <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
+   
+    <script src="{{ url_for('static',filename ='bundles/izitoast/js/iziToast.min.js') }}"></script>
+    <!-- Page Specific JS File -->
+    <script>
+        $(document).ready(function() {
+            {% with messages = get_flashed_messages(with_categories=True) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        {% if category == 'success' %}
+                            iziToast.success({
+                              title: "Congratulation !!",
+                              message: "{{ message }}",
+                               position: 'topRight'
+                              });
+                        {% elif category == 'error' %}
+                            iziToast.error({
+                                title: "Error",
+                                message: "{{ message }}",
+                               position: 'topRight'
+                            });
+                        {% else %}
+                             iziToast.error({
+                                title: "Error",
+                               message: "{{ message }}",
+                               position: 'topRight'
+                             });
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        });
+    </script>
+</body>
+</html>
